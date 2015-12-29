@@ -1,0 +1,29 @@
+{
+  "name": "dynammo",
+  "version": "0.1.0",
+  "description": "Wrapper for dynamoDB and node",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gimenete/dynammo.git"
+  },
+  "keywords": [
+    "dynamodb"
+  ],
+  "author": "Alberto Gimeno <gimenete@gimenete.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gimenete/dynammo/issues"
+  },
+  "homepage": "https://github.com/gimenete/dynammo#readme",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.2.26",
+    "mocha": "^2.3.4"
+  }
+}
