@@ -4,6 +4,48 @@ module.exports = function(dynamo) {
 
   var ammo = {}
 
+  function extendExpressionAttributeValues(params, values) {
+    if (values && _.size(values) > 0) {
+      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues || {}, serializeAttribute(values))
+    }
+  }
+
+  function extendExpressionAttributeNames(params, names) {
+    if (names && _.size(names) > 0) {
+      params.ExpressionAttributeNames = _.extend(params.ExpressionAttributeNames || {}, names)
+    }
+  }
+
+  function wrapResponse(attr, key, callback) {
+    return function(err, data) {
+      if (err) return callback(err)
+      var res = { raw: data }
+      var value = data[attr]
+      if (Array.isArray(value)) {
+        res[key] = value.map(function(item) {
+          return deserializeItem(item)
+        })
+      } else if (value && typeof value === 'object') {
+        res[key] = deserializeItem(value)
+      }
+      callback(null, res)
+    }
+  }
+
+  function deserializeItem(item) {
+    var obj = {}
+    Object.keys(item).forEach(function(key) {
+      Object.keys(item[key]).forEach(function(type) {
+        var value = item[key][type]
+        if (type === 'N') value = +value
+        if (type === 'NS') value = value.map(function(s) { return +s })
+        // TODO: test buffer, list and set types
+        obj[key] = value
+      })
+    })
+    return obj
+  }
+
   function attributeType(value) {
     var type = typeof value
     if (type === 'string') {
@@ -47,14 +89,14 @@ module.exports = function(dynamo) {
       })
     } else {
       var obj = {}
-      obj[type] = value
+      obj[type] = String(value)
       return obj
     }
   }
 
   ammo.PutItem = function(table) {
     var self = this
-    var params = { TableName: table, ExpressionAttributeValues: {} }
+    var params = { TableName: table }
 
     self.item = function(item) {
       params.Item = serializeAttribute(item)
@@ -79,14 +121,15 @@ module.exports = function(dynamo) {
       return self
     }
 
-    self.condition = function(condition, values) {
+    self.condition = function(condition, values, names) {
       params.ConditionExpression = condition
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
+      extendExpressionAttributeValues(params, values)
+      extendExpressionAttributeNames(params, names)
       return self
     }
 
     self.run = function(callback) {
-      dynamo.putItem(self.params(), callback)
+      dynamo.putItem(self.params(), wrapResponse('Attributes', 'attributes', callback))
       return self
     }
 
@@ -106,15 +149,17 @@ module.exports = function(dynamo) {
       return self
     }
 
-    self.update = function(expression, values) {
+    self.update = function(expression, values, names) {
       params.UpdateExpression = expression
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
+      extendExpressionAttributeValues(params, values)
+      extendExpressionAttributeNames(params, names)
       return self
     }
 
-    self.condition = function(condition, values) {
+    self.condition = function(condition, values, names) {
       params.ConditionExpression = condition
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
+      extendExpressionAttributeValues(params, values)
+      extendExpressionAttributeNames(params, names)
       return self
     }
 
@@ -137,7 +182,7 @@ module.exports = function(dynamo) {
     }
 
     self.run = function(callback) {
-      dynamo.updateItem(self.params(), callback)
+      dynamo.updateItem(self.params(), wrapResponse('Attributes', 'attributes', callback))
       return self
     }
 
@@ -150,7 +195,7 @@ module.exports = function(dynamo) {
 
   ammo.DeleteItem = function(table) {
     var self = this
-    var params = { TableName: table, ExpressionAttributeValues: {} }
+    var params = { TableName: table }
 
     self.key = function(key) {
       params.Key = serializeAttribute(key)
@@ -175,14 +220,15 @@ module.exports = function(dynamo) {
       return self
     }
 
-    self.condition = function(condition, values) {
+    self.condition = function(condition, values, names) {
       params.ConditionExpression = condition
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
+      extendExpressionAttributeValues(params, values)
+      extendExpressionAttributeNames(params, names)
       return self
     }
 
     self.run = function(callback) {
-      dynamo.deleteItem(self.params(), callback)
+      dynamo.deleteItem(self.params(), wrapResponse('Attributes', 'attributes', callback))
       return self
     }
 
@@ -214,7 +260,7 @@ module.exports = function(dynamo) {
     }
 
     self.run = function(callback) {
-      dynamo.getItem(self.params(), callback)
+      dynamo.getItem(self.params(), wrapResponse('Item', 'item', callback))
       return self
     }
 
@@ -232,7 +278,7 @@ module.exports = function(dynamo) {
 
   ammo.Query = function(table) {
     var self = this
-    var params = { TableName: table, ExpressionAttributeValues: {} }
+    var params = { TableName: table }
 
     // 'ALL_ATTRIBUTES | ALL_PROJECTED_ATTRIBUTES | SPECIFIC_ATTRIBUTES | COUNT'
     self.select = function(select) {
@@ -258,13 +304,12 @@ module.exports = function(dynamo) {
 
     self.condition = function(expression, values) {
       params.KeyConditionExpression = expression
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
+      extendExpressionAttributeValues(params, values)
       return self
     }
 
-    self.filter = function(expression, values) {
+    self.filter = function(expression) {
       params.FilterExpression = expression
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
       return self
     }
 
@@ -293,8 +338,8 @@ module.exports = function(dynamo) {
       return params
     }
 
-    self.query = function(callback) {
-      dynamodb.query(self.params(), callback)
+    self.run = function(callback) {
+      dynamo.query(self.params(), wrapResponse('Items', 'items', callback))
       return self
     }
 
@@ -303,7 +348,7 @@ module.exports = function(dynamo) {
 
   ammo.Scan = function(table) {
     var self = this
-    var params = { TableName: table, ExpressionAttributeValues: {} }
+    var params = { TableName: table }
 
     // 'ALL_ATTRIBUTES | ALL_PROJECTED_ATTRIBUTES | SPECIFIC_ATTRIBUTES | COUNT'
     self.select = function(select) {
@@ -329,7 +374,6 @@ module.exports = function(dynamo) {
 
     self.filter = function(expression, values) {
       params.FilterExpression = expression
-      params.ExpressionAttributeValues = _.extend(params.ExpressionAttributeValues, serializeAttribute(values))
       return self
     }
 
@@ -363,8 +407,8 @@ module.exports = function(dynamo) {
       return params
     }
 
-    self.scan = function(callback) {
-      dynamodb.scan(self.params(), callback)
+    self.run = function(callback) {
+      dynamo.scan(self.params(), wrapResponse('Items', 'items', callback))
       return self
     }
 
