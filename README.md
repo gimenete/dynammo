@@ -67,7 +67,7 @@ npm install dynammo --save
 ```javascript
 var AWS = require('aws-sdk')
 var dynamo = new AWS.DynamoDB()
-var ammo = require('../')(dynamo)
+var ammo = require('dynammo')(dynamo)
 
 // Available objects and methods:
 
