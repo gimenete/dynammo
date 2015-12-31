@@ -1,10 +1,11 @@
 {
   "name": "dynammo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Wrapper for dynamoDB and node",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test",
+    "coverage": "nyc npm test"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.2.26",
-    "mocha": "^2.3.4"
+    "mocha": "^2.3.4",
+    "nyc": "^5.1.1"
   }
 }

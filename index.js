@@ -302,9 +302,10 @@ module.exports = function(dynamo) {
       return self
     }
 
-    self.condition = function(expression, values) {
+    self.condition = function(expression, values, names) {
       params.KeyConditionExpression = expression
       extendExpressionAttributeValues(params, values)
+      extendExpressionAttributeNames(params, names)
       return self
     }
 
