@@ -1,11 +1,11 @@
 {
   "name": "dynammo",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Wrapper for dynamoDB and node",
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
-    "coverage": "nyc npm test"
+    "coverage": "nyc --reporter=lcov npm test && nyc report"
   },
   "repository": {
     "type": "git",

@@ -142,7 +142,7 @@ module.exports = function(dynamo) {
 
   ammo.UpdateItem = function(table) {
     var self = this
-    var params = { TableName: table, ExpressionAttributeValues: {} }
+    var params = { TableName: table }
 
     self.key = function(key) {
       params.Key = serializeAttribute(key)
