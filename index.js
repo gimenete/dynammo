@@ -1,8 +1,9 @@
 var _ = require('underscore')
 
-module.exports = function(dynamo) {
+module.exports = function(dynamo, prefix) {
 
   var ammo = {}
+  prefix = prefix || ''
 
   function extendExpressionAttributeValues(params, values) {
     if (values && _.size(values) > 0) {
@@ -96,7 +97,7 @@ module.exports = function(dynamo) {
 
   ammo.PutItem = function(table) {
     var self = this
-    var params = { TableName: table }
+    var params = { TableName: prefix+table }
 
     self.item = function(item) {
       params.Item = serializeAttribute(item)
@@ -142,7 +143,7 @@ module.exports = function(dynamo) {
 
   ammo.UpdateItem = function(table) {
     var self = this
-    var params = { TableName: table }
+    var params = { TableName: prefix+table }
 
     self.key = function(key) {
       params.Key = serializeAttribute(key)
@@ -195,7 +196,7 @@ module.exports = function(dynamo) {
 
   ammo.DeleteItem = function(table) {
     var self = this
-    var params = { TableName: table }
+    var params = { TableName: prefix+table }
 
     self.key = function(key) {
       params.Key = serializeAttribute(key)
@@ -241,7 +242,7 @@ module.exports = function(dynamo) {
 
   ammo.GetItem = function(table) {
     var self = this
-    var params = { TableName: table }
+    var params = { TableName: prefix+table }
 
     self.key = function(key) {
       params.Key = serializeAttribute(key)
@@ -278,7 +279,7 @@ module.exports = function(dynamo) {
 
   ammo.Query = function(table) {
     var self = this
-    var params = { TableName: table }
+    var params = { TableName: prefix+table }
 
     // 'ALL_ATTRIBUTES | ALL_PROJECTED_ATTRIBUTES | SPECIFIC_ATTRIBUTES | COUNT'
     self.select = function(select) {
@@ -293,7 +294,7 @@ module.exports = function(dynamo) {
     }
 
     self.indexName = function(indexName) {
-      params.IndexName = indexName
+      params.IndexName = prefix+indexName
       return self
     }
 
@@ -349,7 +350,7 @@ module.exports = function(dynamo) {
 
   ammo.Scan = function(table) {
     var self = this
-    var params = { TableName: table }
+    var params = { TableName: prefix+table }
 
     // 'ALL_ATTRIBUTES | ALL_PROJECTED_ATTRIBUTES | SPECIFIC_ATTRIBUTES | COUNT'
     self.select = function(select) {
@@ -364,7 +365,7 @@ module.exports = function(dynamo) {
     }
 
     self.indexName = function(indexName) {
-      params.IndexName = indexName
+      params.IndexName = prefix+indexName
       return self
     }
 

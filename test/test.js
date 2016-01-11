@@ -6,14 +6,17 @@ var dynamo = new AWS.DynamoDB({
   region: 'us-east-1',
   endpoint: 'http://localhost:8000',
 })
-var ammo = require('../')(dynamo)
 
 describe('Should test', function() {
 
-  var tableName = 'dynammo_movies'
+  var prefix = 'dynammo_'
+  var tableName = 'movies'
+  var fullTableName = prefix+tableName
+  var ammo = require('../')(dynamo, prefix)
 
   before(function(done) {
-    dynamo.deleteTable({ TableName: tableName }, function(err) {
+    this.timeout(10000)
+    dynamo.deleteTable({ TableName: fullTableName }, function(err) {
       if (err && err.code !== 'ResourceNotFoundException') return done(err)
       var params = {
         "AttributeDefinitions": [
@@ -32,7 +35,7 @@ describe('Should test', function() {
         ],
         "GlobalSecondaryIndexes": [
           {
-            "IndexName": tableName+"_index_genre",
+            "IndexName": fullTableName+"_index_genre",
             "KeySchema": [
               {
                 "AttributeName": "genre",
@@ -48,7 +51,7 @@ describe('Should test', function() {
             }
           }
         ],
-        "TableName": tableName,
+        "TableName": fullTableName,
         "KeySchema": [
           {
             "AttributeName": "title",

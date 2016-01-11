@@ -10,7 +10,7 @@ new ammo.UpdateItem('movies')
     title: 'The Force Awakens'
   })
   .update('remove info.actors[0]')
-  .condition('size(info.actors) > :num', { num: 3 })
+  .condition('size(info.actors) > :num', { ':num': 3 })
   .returnConsumedCapacity('indexes')
   .returnItemCollectionMetrics('size')
   .returnValues('updated_new')
@@ -29,7 +29,7 @@ Instead of writing
 var params = {
   "TableName": "movies",
   "ExpressionAttributeValues": {
-    "num": {
+    ":num": {
       "N": 3
     }
   },
@@ -67,7 +67,7 @@ npm install dynammo --save
 ```javascript
 var AWS = require('aws-sdk')
 var dynamo = new AWS.DynamoDB()
-var ammo = require('dynammo')(dynamo)
+var ammo = require('dynammo')(dynamo, 'optional_prefix_')
 
 // Available objects and methods:
 
@@ -78,6 +78,8 @@ new ammo.GetItem('table_name')...run(callback)
 new ammo.Query('table_name')...run(callback)
 new ammo.Scan('table_name')...run(callback)
 ```
+
+The optional prefix will be used in all table and index names. This is useful if you have multiple apps using the same AWS account. This way you can use a prefix per app and you don't have naming collisions.
 
 ### Expression values and names
 
