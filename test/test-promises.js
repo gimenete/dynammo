@@ -19,7 +19,7 @@ describe('Should test', function() {
     require('./test-utils').createTable(dynamo, fullTableName, done)
   })
 
-  it('#PutItem', function(done) {
+  it('#PutItem', function() {
     var putItem = new ammo.PutItem(tableName)
       .item({
         year: 2015,
@@ -52,14 +52,13 @@ describe('Should test', function() {
       "ReturnItemCollectionMetrics": "SIZE",
       "ReturnValues": "NONE"
     }))
-    putItem.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, { raw: {} }))
-      done()
-    })
+    return putItem.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, { raw: {} }))
+      })
   })
 
-  it('#UpdateItem', function(done) {
+  it('#UpdateItem', function() {
     var updateItem = new ammo.UpdateItem(tableName)
       .key({
         year: 2015,
@@ -92,25 +91,24 @@ describe('Should test', function() {
       "ReturnItemCollectionMetrics": "SIZE",
       "ReturnValues": "UPDATED_NEW"
     }))
-    updateItem.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, {
-        "raw": {
-          "Attributes": {
-            "score": {
-              "N": "10"
+    return updateItem.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, {
+          "raw": {
+            "Attributes": {
+              "score": {
+                "N": "10"
+              }
             }
+          },
+          "attributes": {
+            "score": 10
           }
-        },
-        "attributes": {
-          "score": 10
-        }
-      }))
-      done()
-    })
+        }))
+      })
   })
 
-  it('#UpdateItem', function(done) {
+  it('#UpdateItem', function() {
     var updateItem = new ammo.UpdateItem(tableName)
       .key({
         year: 2015,
@@ -147,13 +145,14 @@ describe('Should test', function() {
       "ReturnItemCollectionMetrics": "SIZE",
       "ReturnValues": "UPDATED_NEW"
     }))
-    updateItem.run(function(err, res) {
-      assert.ok(err && err.code === 'ConditionalCheckFailedException')
-      done()
-    })
+    return updateItem.run()
+      .then(() => { throw new Error('UpdateItem should have failed') })
+      .catch(function(err) {
+        assert.ok(err && err.code === 'ConditionalCheckFailedException')
+      })
   })
 
-  it('#Query', function(done) {
+  it('#Query', function() {
     var query = new ammo.Query(tableName)
       .select('*')
       .consistentRead(false)
@@ -183,43 +182,42 @@ describe('Should test', function() {
       },
       "ReturnConsumedCapacity": "INDEXES"
     }))
-    query.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, {
-        "raw": {
-          "Items": [
-            {
-              "genre": {
-                "S": "Science fiction"
-              },
-              "score": {
-                "N": "10"
-              },
-              "title": {
-                "S": "The Force Awakens"
-              },
-              "year": {
-                "N": "2015"
+    return query.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, {
+          "raw": {
+            "Items": [
+              {
+                "genre": {
+                  "S": "Science fiction"
+                },
+                "score": {
+                  "N": "10"
+                },
+                "title": {
+                  "S": "The Force Awakens"
+                },
+                "year": {
+                  "N": "2015"
+                }
               }
+            ],
+            "Count": 1,
+            "ScannedCount": 1
+          },
+          "items": [
+            {
+              "genre": "Science fiction",
+              "score": 10,
+              "title": "The Force Awakens",
+              "year": 2015
             }
-          ],
-          "Count": 1,
-          "ScannedCount": 1
-        },
-        "items": [
-          {
-            "genre": "Science fiction",
-            "score": 10,
-            "title": "The Force Awakens",
-            "year": 2015
-          }
-        ]
-      }))
-      done()
-    })
+          ]
+        }))
+      })
   })
 
-  it('#Query', function(done) {
+  it('#Query', function() {
     var query = new ammo.Query(tableName)
       .select('*')
       .consistentRead(false)
@@ -241,43 +239,42 @@ describe('Should test', function() {
       },
       "ReturnConsumedCapacity": "INDEXES"
     }))
-    query.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, {
-        "raw": {
-          "Items": [
-            {
-              "genre": {
-                "S": "Science fiction"
-              },
-              "score": {
-                "N": "10"
-              },
-              "title": {
-                "S": "The Force Awakens"
-              },
-              "year": {
-                "N": "2015"
+    return query.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, {
+          "raw": {
+            "Items": [
+              {
+                "genre": {
+                  "S": "Science fiction"
+                },
+                "score": {
+                  "N": "10"
+                },
+                "title": {
+                  "S": "The Force Awakens"
+                },
+                "year": {
+                  "N": "2015"
+                }
               }
+            ],
+            "Count": 1,
+            "ScannedCount": 1
+          },
+          "items": [
+            {
+              "genre": "Science fiction",
+              "score": 10,
+              "title": "The Force Awakens",
+              "year": 2015
             }
-          ],
-          "Count": 1,
-          "ScannedCount": 1
-        },
-        "items": [
-          {
-            "genre": "Science fiction",
-            "score": 10,
-            "title": "The Force Awakens",
-            "year": 2015
-          }
-        ]
-      }))
-      done()
-    })
+          ]
+        }))
+      })
   })
 
-  it('#Scan', function(done) {
+  it('#Scan', function() {
     var scan = new ammo.Scan(tableName)
       .select('*')
       .consistentRead(false)
@@ -292,43 +289,42 @@ describe('Should test', function() {
       "IndexName": "dynammo_movies_index_genre",
       "ReturnConsumedCapacity": "INDEXES",
     }))
-    scan.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, {
-        "raw": {
-          "Items": [
-            {
-              "genre": {
-                "S": "Science fiction"
-              },
-              "score": {
-                "N": "10"
-              },
-              "title": {
-                "S": "The Force Awakens"
-              },
-              "year": {
-                "N": "2015"
+    return scan.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, {
+          "raw": {
+            "Items": [
+              {
+                "genre": {
+                  "S": "Science fiction"
+                },
+                "score": {
+                  "N": "10"
+                },
+                "title": {
+                  "S": "The Force Awakens"
+                },
+                "year": {
+                  "N": "2015"
+                }
               }
+            ],
+            "Count": 1,
+            "ScannedCount": 1
+          },
+          "items": [
+            {
+              "genre": "Science fiction",
+              "score": 10,
+              "title": "The Force Awakens",
+              "year": 2015
             }
-          ],
-          "Count": 1,
-          "ScannedCount": 1
-        },
-        "items": [
-          {
-            "genre": "Science fiction",
-            "score": 10,
-            "title": "The Force Awakens",
-            "year": 2015
-          }
-        ]
-      }))
-      done()
-    })
+          ]
+        }))
+      })
   })
 
-  it('#GetItem', function(done) {
+  it('#GetItem', function() {
     var getItem = new ammo.GetItem(tableName)
       .key({
         year: 2015,
@@ -351,37 +347,36 @@ describe('Should test', function() {
       "ReturnConsumedCapacity": "INDEXES",
       "ConsistentRead": true
     }))
-    getItem.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, {
-        "raw": {
-          "Item": {
-            "genre": {
-              "S": "Science fiction"
-            },
-            "score": {
-              "N": "10"
-            },
-            "title": {
-              "S": "The Force Awakens"
-            },
-            "year": {
-              "N": "2015"
+    return getItem.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, {
+          "raw": {
+            "Item": {
+              "genre": {
+                "S": "Science fiction"
+              },
+              "score": {
+                "N": "10"
+              },
+              "title": {
+                "S": "The Force Awakens"
+              },
+              "year": {
+                "N": "2015"
+              }
             }
+          },
+          "item": {
+            "genre": "Science fiction",
+            "score": 10,
+            "title": "The Force Awakens",
+            "year": 2015
           }
-        },
-        "item": {
-          "genre": "Science fiction",
-          "score": 10,
-          "title": "The Force Awakens",
-          "year": 2015
-        }
-      }))
-      done()
-    })
+        }))
+      })
   })
 
-  it('#DeleteItem', function(done) {
+  it('#DeleteItem', function() {
     var deleteItem = new ammo.DeleteItem(tableName)
       .key({
         year: 2015,
@@ -413,13 +408,14 @@ describe('Should test', function() {
         }
       }
     }))
-    deleteItem.run(function(err, res) {
-      assert.ok(err && err.code === 'ConditionalCheckFailedException')
-      done()
-    })
+    return deleteItem.run()
+      .then(() => { throw new Error('DeleteItem should have failed') })
+      .catch(function(err) {
+        assert.ok(err && err.code === 'ConditionalCheckFailedException')
+      })
   })
 
-  it('#DeleteItem', function(done) {
+  it('#DeleteItem', function() {
     var deleteItem = new ammo.DeleteItem(tableName)
       .key({
         year: 2015,
@@ -451,34 +447,33 @@ describe('Should test', function() {
         }
       }
     }))
-    deleteItem.run(function(err, res) {
-      if (err) return done(err)
-      assert.ok(_.isEqual(res, {
-        "raw": {
-          "Attributes": {
-            "genre": {
-              "S": "Science fiction"
-            },
-            "score": {
-              "N": "10"
-            },
-            "title": {
-              "S": "The Force Awakens"
-            },
-            "year": {
-              "N": "2015"
+    return deleteItem.run()
+      .then(function(res) {
+        assert.ok(_.isEqual(res, {
+          "raw": {
+            "Attributes": {
+              "genre": {
+                "S": "Science fiction"
+              },
+              "score": {
+                "N": "10"
+              },
+              "title": {
+                "S": "The Force Awakens"
+              },
+              "year": {
+                "N": "2015"
+              }
             }
+          },
+          "attributes": {
+            "genre": "Science fiction",
+            "score": 10,
+            "title": "The Force Awakens",
+            "year": 2015
           }
-        },
-        "attributes": {
-          "genre": "Science fiction",
-          "score": 10,
-          "title": "The Force Awakens",
-          "year": 2015
-        }
-      }))
-      done()
-    })
+        }))
+      })
   })
 
 })

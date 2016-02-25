@@ -17,20 +17,35 @@ module.exports = function(dynamo, prefix) {
     }
   }
 
-  function wrapResponse(attr, key, callback) {
-    return function(err, data) {
-      if (err) return callback(err)
-      var res = { raw: data }
-      var value = data[attr]
-      if (Array.isArray(value)) {
-        res[key] = value.map(function(item) {
-          return deserializeItem(item)
+  function invoke(self, obj, methodName, attr, key, callback) {
+    var params = self.params()
+    if (callback) {
+      obj[methodName](params, function(err, data) {
+        if (err) return callback(err)
+        var res = processResponse(data, attr, key)
+        callback(null, res)
+      })
+      return self
+    } else {
+      return new Promise((resolve, reject) => {
+        obj[methodName](params, function(err, data) {
+          err ? reject(err) : resolve(processResponse(data, attr, key))
         })
-      } else if (value && typeof value === 'object') {
-        res[key] = deserializeItem(value)
-      }
-      callback(null, res)
+      })
     }
+  }
+
+  function processResponse(data, attr, key) {
+    var res = { raw: data }
+    var value = data[attr]
+    if (Array.isArray(value)) {
+      res[key] = value.map(function(item) {
+        return deserializeItem(item)
+      })
+    } else if (value && typeof value === 'object') {
+      res[key] = deserializeItem(value)
+    }
+    return res
   }
 
   function deserializeItem(item) {
@@ -130,8 +145,7 @@ module.exports = function(dynamo, prefix) {
     }
 
     self.run = function(callback) {
-      dynamo.putItem(self.params(), wrapResponse('Attributes', 'attributes', callback))
-      return self
+      return invoke(self, dynamo, 'putItem', 'Attributes', 'attributes', callback)
     }
 
     self.params = function() {
@@ -183,8 +197,7 @@ module.exports = function(dynamo, prefix) {
     }
 
     self.run = function(callback) {
-      dynamo.updateItem(self.params(), wrapResponse('Attributes', 'attributes', callback))
-      return self
+      return invoke(self, dynamo, 'updateItem', 'Attributes', 'attributes', callback)
     }
 
     self.params = function() {
@@ -229,8 +242,7 @@ module.exports = function(dynamo, prefix) {
     }
 
     self.run = function(callback) {
-      dynamo.deleteItem(self.params(), wrapResponse('Attributes', 'attributes', callback))
-      return self
+      return invoke(self, dynamo, 'deleteItem', 'Attributes', 'attributes', callback)
     }
 
     self.params = function() {
@@ -261,8 +273,7 @@ module.exports = function(dynamo, prefix) {
     }
 
     self.run = function(callback) {
-      dynamo.getItem(self.params(), wrapResponse('Item', 'item', callback))
-      return self
+      return invoke(self, dynamo, 'getItem', 'Item', 'item', callback)
     }
 
     self.projection = function(expression) {
@@ -341,8 +352,7 @@ module.exports = function(dynamo, prefix) {
     }
 
     self.run = function(callback) {
-      dynamo.query(self.params(), wrapResponse('Items', 'items', callback))
-      return self
+      return invoke(self, dynamo, 'query', 'Items', 'items', callback)
     }
 
     return self
@@ -410,8 +420,7 @@ module.exports = function(dynamo, prefix) {
     }
 
     self.run = function(callback) {
-      dynamo.scan(self.params(), wrapResponse('Items', 'items', callback))
-      return self
+      return invoke(self, dynamo, 'scan', 'Items', 'items', callback)
     }
 
     return self
