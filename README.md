@@ -2,7 +2,7 @@
 
 A simple wrapper library that simplifies using dynamoDB from Node.js.
 
-Note: any `run()` method supports both callbacks and *promises*. If you don't pass a callback it will return a promise.
+Note: any `run()` method supports both callbacks and **promises**. If you don't pass a callback it will return a promise.
 
 You write
 
