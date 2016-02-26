@@ -2,7 +2,7 @@
 
 A simple wrapper library that simplifies using dynamoDB from Node.js.
 
-Note: any `run()` method supports both callbacks and **promises**. If you don't pass a callback it will return a promise.
+**Note**: any `run()` method supports both callbacks and **promises**. If you don't pass a callback it will return a promise.
 
 You write
 
@@ -74,13 +74,15 @@ var ammo = require('dynammo')(dynamo, 'optional_prefix_')
 
 // Available objects and methods:
 
-new ammo.PutItem('table_name')...run(callback)
-new ammo.UpdateItem('table_name')...run(callback)
-new ammo.DeleteItem('table_name')...run(callback)
-new ammo.GetItem('table_name')...run(callback)
-new ammo.Query('table_name')...run(callback)
-new ammo.Scan('table_name')...run(callback)
+new ammo.PutItem('table_name')...run([callback])
+new ammo.UpdateItem('table_name')...run([callback])
+new ammo.DeleteItem('table_name')...run([callback])
+new ammo.GetItem('table_name')...run([callback])
+new ammo.Query('table_name')...run([callback])
+new ammo.Scan('table_name')...run([callback])
 ```
+
+**Note**: any `run()` method supports both callbacks and **promises**. If you don't pass a callback it will return a promise.
 
 The optional prefix will be used in all table and index names. This is useful if you have multiple apps using the same AWS account. This way you can use a prefix per app and you don't have naming collisions.
 
@@ -136,7 +138,7 @@ Methods
 - `returnValues(string)` allowed values are `NONE`, `ALL_OLD`, `UPDATED_OLD`, `ALL_NEW`, `UPDATED_NEW` (case insensitive)
 - `condition(condition[, values[, names]])`
 - `params()` returns the `params` object that would be passed to the AWS SDK
-- `run(callback)` invokes the `putItem()` method in the AWS SDK
+- `run([callback])` invokes the `putItem()` method in the AWS SDK
 
 ### UpdateItem
 
@@ -168,7 +170,7 @@ Methods
 - `returnValues(string)` allowed values are `NONE`, `ALL_OLD`, `UPDATED_OLD`, `ALL_NEW`, `UPDATED_NEW` (case insensitive)
 - `condition(condition[, values[, names]])` allows you to specify a condition. If the condition is evaluated to true amazon won't update the object
 - `params()` returns the `params` object that would be passed to the AWS SDK
-- `run(callback)` invokes the `updateItem()` method in the AWS SDK
+- `run([callback])` invokes the `updateItem()` method in the AWS SDK
 
 ### DeleteItem
 
@@ -198,7 +200,7 @@ Methods
 - `returnValues(string)` allowed values are `NONE`, `ALL_OLD`, `UPDATED_OLD`, `ALL_NEW`, `UPDATED_NEW` (case insensitive)
 - `condition(condition[, values[, names]])` allows you to specify a condition. If the condition is evaluated to true amazon won't delete the object
 - `params()` returns the `params` object that would be passed to the AWS SDK
-- `run(callback)` invokes the `deleteItem()` method in the AWS SDK
+- `run([callback])` invokes the `deleteItem()` method in the AWS SDK
 
 ### GetItem
 
@@ -224,7 +226,7 @@ Methods
 - `consistentRead(boolean)` allows you to specify the consistent read constraint
 - `returnConsumedCapacity(string)` allowed values are `INDEXES`, `TOTAL` or `NONE` (case insensitive)
 - `params()` returns the `params` object that would be passed to the AWS SDK
-- `run(callback)` invokes the `getItem()` method in the AWS SDK
+- `run([callback])` invokes the `getItem()` method in the AWS SDK
 
 ### Query
 
@@ -257,7 +259,7 @@ Methods
 - `consistentRead(boolean)` allows you to specify the consistent read constraint
 - `returnConsumedCapacity(string)` allowed values are `INDEXES`, `TOTAL` or `NONE` (case insensitive)
 - `params()` returns the `params` object that would be passed to the AWS SDK
-- `run(callback)` invokes the `getItem()` method in the AWS SDK
+- `run([callback])` invokes the `getItem()` method in the AWS SDK
 
 ### Scan
 
@@ -287,7 +289,7 @@ Methods
 - `consistentRead(boolean)` allows you to specify the consistent read constraint
 - `returnConsumedCapacity(string)` allowed values are `INDEXES`, `TOTAL` or `NONE` (case insensitive)
 - `params()` returns the `params` object that would be passed to the AWS SDK
-- `run(callback)` invokes the `getItem()` method in the AWS SDK
+- `run([callback])` invokes the `getItem()` method in the AWS SDK
 
 ## Testing
 
